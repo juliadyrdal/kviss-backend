@@ -22,6 +22,7 @@ app.use(cors({
   origin: clientUrl,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true, // Allow session cookie from browser to pass through
+  allowedHeaders: 'Content-Type,Authorization', // Ensure headers are allowed
 }));
 
 // Set up mongoose connection
