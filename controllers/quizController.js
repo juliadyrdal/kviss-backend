@@ -7,6 +7,8 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
+const request = require('request');
+
 // Generate a new quiz
 exports.generateQuiz = asyncHandler(async (req, res) => {
     const { theme, numQuestions, difficulty } = req.body;

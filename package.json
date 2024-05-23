@@ -15,9 +15,11 @@
     "express": "~4.16.1",
     "express-async-handler": "^1.2.0",
     "express-validator": "^7.0.1",
-    "mongoose": "^8.3.5",
+    "mongoose": "^8.4.0",
     "morgan": "~1.9.1",
     "openai": "^4.47.1",
+    "request": "^2.88.2",
+    "request-promise-native": "^1.0.9",
     "socket.io": "^4.7.5"
   }
 }

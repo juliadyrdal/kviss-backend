@@ -25,10 +25,29 @@ app.use(cors({
   credentials: true
 }));
 
-
-// Set up mongoose connection
+// Set up mongoose connection with Fixie proxy
 const mongoDb = process.env.MONGO_URI;
-mongoose.connect(mongoDb, { useNewUrlParser: true, useUnifiedTopology: true });
+const fixieUrl = process.env.FIXIE_URL;
+
+// Use the Fixie proxy for the MongoDB connection
+const fixieProxy = new URL(fixieUrl);
+const proxyHost = fixieProxy.hostname;
+const proxyPort = fixieProxy.port;
+const proxyAuth = fixieProxy.username + ':' + fixieProxy.password;
+
+mongoose.connect(mongoDb, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  proxy: {
+    host: proxyHost,
+    port: proxyPort,
+    auth: {
+      username: fixieProxy.username,
+      password: fixieProxy.password
+    }
+  }
+});
+
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
