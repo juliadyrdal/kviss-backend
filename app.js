@@ -36,9 +36,26 @@ app.options('*', cors({
 // Set up mongoose connection
 const mongoDb = process.env.MONGO_URI;
 
-mongoose.connect(mongoDb, {});
+const mongooseOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  ssl: true,
+  sslValidate: true, // Ensure SSL is validated
+};
+
+mongoose.connect(mongoDb, mongooseOptions);
 const db = mongoose.connection;
-db.on("error", console.error.bind(console, "MongoDB connection error:"));
+
+// Add detailed error logging
+db.on("error", (error) => {
+  console.error("MongoDB connection error:", error);
+  if (error.name === 'MongoNetworkError') {
+    console.error("Network error details:", error);
+  }
+});
+db.once("open", () => {
+  console.log("MongoDB connected successfully!");
+});
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
