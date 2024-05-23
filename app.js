@@ -19,10 +19,18 @@ const clientUrl = process.env.CLIENT_URL || 'https://kviss.netlify.app';
 
 // Use CORS
 app.use(cors({
-  origin: [clientUrl, "https://kviss.netlify.app"], 
+  origin: [clientUrl, 'https://kviss.netlify.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  credentials: true,
+}));
+
+// Handle preflight requests
+app.options('*', cors({
+  origin: [clientUrl, 'https://kviss.netlify.app'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
 }));
 
 // Set up mongoose connection
