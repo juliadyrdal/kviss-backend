@@ -37,10 +37,7 @@ app.options('*', cors({
 const mongoDb = process.env.MONGO_URI;
 
 const mongooseOptions = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  ssl: true,
-  sslValidate: true, // Ensure SSL is validated
+  ssl: true, // Ensure SSL is used
 };
 
 mongoose.connect(mongoDb, mongooseOptions);
