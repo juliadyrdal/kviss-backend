@@ -1,0 +1,167 @@
+#!/usr/bin/env node
+
+const app = require('../app');
+const debug = require('debug')('quiz-backend:server');
+const http = require('http');
+const { Server } = require('socket.io');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+const port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+const server = http.createServer(app);
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+// Create socket.io server
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:3001',
+    methods: ['GET', 'POST'],
+    credentials: true,
+  }
+});
+
+let quizRooms = {};
+
+io.on('connection', (socket) => {
+  console.log('A user connected: ' + socket.id);
+
+  // Notify all players/clients that new player joined quiz
+  socket.on('joinQuiz', ({ quizId, playerName }) => {
+    socket.join(quizId);
+    if (!quizRooms[quizId]) {
+      quizRooms[quizId] = { players: {}, questionsFinished: 0, totalQuestions: 0 };
+    }
+    quizRooms[quizId].players[socket.id] = { playerName, score: 0, finishedCurrentQuestion: false };
+    io.to(quizId).emit('newUser', `User ${playerName} (${socket.id}) has joined the quiz`);
+  });
+
+  // Check aubmitted answer and update score and questions index
+  socket.on('submitAnswer', (answerData) => {
+    const { quizId, questionIndex, selectedAnswer, correctAnswer } = answerData;
+    if (quizRooms[quizId] && quizRooms[quizId].players[socket.id]) {
+      if (selectedAnswer === correctAnswer) {
+        quizRooms[quizId].players[socket.id].score += 1;
+      }
+      quizRooms[quizId].players[socket.id].finishedCurrentQuestion = true;
+      quizRooms[quizId].questionsFinished += 1;
+
+      io.to(quizId).emit('answerSubmitted', {
+        playerId: socket.id,
+        playerName: quizRooms[quizId].players[socket.id].playerName,
+        score: quizRooms[quizId].players[socket.id].score,
+        questionIndex,
+      });
+
+      // Check if all players have finished the current question
+      if (quizRooms[quizId].questionsFinished === Object.keys(quizRooms[quizId].players).length) {
+        // Reset for next questions
+        quizRooms[quizId].questionsFinished = 0;
+        for (let playerId in quizRooms[quizId].players) {
+          quizRooms[quizId].players[playerId].finishedCurrentQuestion = false;
+        }
+
+        const players = Object.values(quizRooms[quizId].players).map(player => ({
+          playerName: player.playerName,
+          score: player.score
+        }));
+        // Sort players by score in descending order
+        players.sort((a, b) => b.score - a.score);
+
+        io.to(quizId).emit('allPlayersFinished', { players, questionIndex });
+      }
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected: ' + socket.id);
+    for (let quizId in quizRooms) {
+      if (quizRooms[quizId].players[socket.id]) {
+        delete quizRooms[quizId].players[socket.id];
+        if (Object.keys(quizRooms[quizId].players).length === 0) {
+          delete quizRooms[quizId];
+        }
+      }
+    }
+  });
+
+  socket.on('setQuestionsCount', (quizId, questionsCount) => {
+    if (quizRooms[quizId]) {
+      quizRooms[quizId].totalQuestions = questionsCount;
+    }
+  });
+});
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  const port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  const bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  const addr = server.address();
+  const bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'Port ' + addr.port;
+  debug('Listening on ' + bind);
+}
