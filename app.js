@@ -21,6 +21,7 @@ const clientUrl = process.env.CLIENT_URL;
 // Use CORS
 app.use(cors({
     origin: clientUrl, 
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     // Allow session cookie from browser to pass through
     credentials: true, 
   }));
