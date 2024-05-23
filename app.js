@@ -15,15 +15,16 @@ const quizzesRouter = require('./routes/quizzes');
 
 const app = express();
 
-const clientUrl = process.env.CLIENT_URL || 'https://kviss.netlify.app'; // Default to your Netlify URL
+const clientUrl = process.env.CLIENT_URL || 'https://kviss.netlify.app';
 
 // Use CORS
 app.use(cors({
-  origin: clientUrl,
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true, // Allow session cookie from browser to pass through
-  allowedHeaders: 'Content-Type,Authorization', // Ensure headers are allowed
+  origin: [clientUrl, "https://kviss.netlify.app"], 
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
+
 
 // Set up mongoose connection
 const mongoDb = process.env.MONGO_URI;
