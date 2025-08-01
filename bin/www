@@ -44,10 +44,14 @@ io.on('connection', (socket) => {
   socket.on('joinQuiz', ({ quizId, playerName }) => {
     socket.join(quizId);
     if (!quizRooms[quizId]) {
-      quizRooms[quizId] = { players: {}, questionsFinished: 0, totalQuestions: 0 };
+      quizRooms[quizId] = { players: {}, questionsFinished: 0, totalQuestions: 0 , readyPlayers: [] };
     }
     quizRooms[quizId].players[socket.id] = { playerName, score: 0, finishedCurrentQuestion: false };
-    io.to(quizId).emit('newUser', `User ${playerName} (${socket.id}) has joined the quiz`);
+    quizRooms[quizId].readyPlayers.push(playerName);
+
+    io.to(quizId).emit('updateReadyPlayers', {
+      readyPlayers: quizRooms[quizId].readyPlayers,
+    });
   });
 
   // Check submitted answer and update score and questions index

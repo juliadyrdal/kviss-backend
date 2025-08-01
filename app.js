@@ -15,11 +15,11 @@ const quizzesRouter = require('./routes/quizzes');
 
 const app = express();
 
-const clientUrl = process.env.CLIENT_URL || 'https://kviss.netlify.app';
+const clientUrl = process.env.CLIENT_URL;
 
 // Use CORS
 app.use(cors({
-  origin: [clientUrl, 'https://kviss.netlify.app'],
+  origin: [clientUrl],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -27,7 +27,7 @@ app.use(cors({
 
 // Handle preflight requests
 app.options('*', cors({
-  origin: [clientUrl, 'https://kviss.netlify.app'],
+  origin: [clientUrl],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
