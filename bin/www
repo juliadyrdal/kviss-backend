@@ -9,7 +9,7 @@ const { Server } = require('socket.io');
  * Get port from environment and store in Express.
  */
 
-const port = normalizePort(process.env.PORT || '3000');
+const port = normalizePort(process.env.PORT || '5000');
 app.set('port', port);
 
 /**
@@ -29,7 +29,7 @@ server.on('listening', onListening);
 // Create socket.io server with CORS configuration
 const io = new Server(server, {
   cors: {
-    origin: [process.env.CLIENT_URL, 'https://kviss.netlify.app'], // Allow multiple origins
+    origin: [process.env.CLIENT_URL], // Allow multiple origins
     methods: ['GET', 'POST'], // Allow these methods
     credentials: true, // Allow credentials
   }

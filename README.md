@@ -50,6 +50,7 @@ Create a .env file in the root with:
 ```bash
 MONGODB_URI=your-mongodb-connection
 OPENAI_API_KEY=your-openai-api-key
+CLIENT_URL=http://localhost:3000
 PORT=5000
 ```
 
