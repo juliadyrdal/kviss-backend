@@ -76,6 +76,7 @@ exports.generateQuiz = asyncHandler(async (req, res) => {
 
 // Find quiz by ID
 exports.findQuizById = asyncHandler(async (req, res) => {
-    const quiz = await Quiz.findById(req.params.id);
+    const id = req.params.id;
+    const quiz = await Quiz.findById(id);
     res.json(quiz);
 });

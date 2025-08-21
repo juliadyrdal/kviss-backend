@@ -52,16 +52,13 @@ db.once("open", () => {
   console.log("MongoDB connected successfully!");
 });
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Routes
 app.use('/api/quiz', quizzesRouter);
 
 module.exports = app;
